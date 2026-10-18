@@ -79,8 +79,8 @@ Pick your device. Every route ends with `http://localhost:5000` in your browser.
 ```bash
 pkg update -y && pkg upgrade -y
 pkg install -y python git
-git clone https://github.com/YOUR-ORG/YOUR-REPO.git
-cd YOUR-REPO
+git clone https://github.com/Let-s-Code-India/Veda-AI.git
+cd Veda-AI
 bash install.sh
 ```
 
