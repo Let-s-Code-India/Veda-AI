@@ -1,0 +1,3 @@
+# Only needed for unusual audio/video formats (.aac, .mkv ...) and very large photos.
+# Not needed on Termux: use  pkg install ffmpeg  instead.
+imageio-ffmpeg

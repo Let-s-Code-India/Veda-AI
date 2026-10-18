@@ -1,0 +1,4 @@
+flask>=3.0
+requests>=2.31
+waitress>=3.0
+pypdf>=4.0

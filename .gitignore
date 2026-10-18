@@ -1,0 +1,20 @@
+# secrets and personal data: never commit these
+.env
+memory.db
+*.db
+*.db-wal
+*.db-shm
+*.db-journal
+data/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# os / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
