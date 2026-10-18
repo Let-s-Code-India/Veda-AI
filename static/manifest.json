@@ -1,0 +1,9 @@
+{
+  "name": "Veda AI",
+  "short_name": "Veda AI",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fcfaff",
+  "theme_color": "#2a1052",
+  "icons": [{ "src": "/logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2a1052">
+<title>Veda AI</title>
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="manifest" href="/static/manifest.json">
+<link rel="stylesheet" href="/static/style.css?v=5">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||'light'}catch(e){}</script>
+</head><body>
+<aside id="side">
+  <div class="brand">
+    <img class="logo" src="/logo.svg" alt="" onerror="this.style.display='none'">
+    <div class="bt"><b id="appName">Veda AI</b><small id="appTag"></small></div>
+  </div>
+  <button class="new" onclick="newChat()">New chat</button>
+  <input id="find" class="find" placeholder="Search chats" oninput="renderConvs()">
+  <div class="sec">Chats</div><div id="convs"></div>
+  <div class="sec">Tools</div>
+  <button class="tool" onclick="openPanel('mem')">Memory</button>
+  <button class="tool" onclick="openPanel('ag')">Agents</button>
+  <button class="tool" onclick="openPanel('mod')">Models</button>
+  <button class="tool" onclick="openPanel('set')">Settings</button>
+</aside>
+<div id="shade" onclick="toggleSide()"></div>
+<main>
+  <header>
+    <button class="ic" onclick="toggleSide()" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <div class="ht"><div id="title">New chat</div><div id="sub"></div></div>
+    <button class="ic" id="pinBtn" onclick="togglePin()" aria-label="Pin chat" title="Pin chat (never auto-deleted)"><svg viewBox="0 0 24 24"><path d="M9 4h6l-1 6 3 3v2H7v-2l3-3-1-6zM12 15v5"/></svg></button>
+    <button class="ic" onclick="exportChat()" aria-label="Export chat" title="Export chat"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button>
+    <button class="ic" onclick="toggleTheme()" aria-label="Light or dark" title="Light / dark"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4v16" /><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+  </header>
+  <div id="chips"></div>
+  <div id="log"></div>
+  <div id="tools"><button id="deepBtn" class="pill" onclick="toggleDeep()">Deep mode off</button><span id="attach"></span></div>
+  <footer>
+    <button class="ic" onclick="fileIn.click()" aria-label="Attach file"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    <input type="file" id="fileIn" hidden>
+    <button class="ic" id="micBtn" onclick="toggleMic()" aria-label="Speak"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+    <textarea id="q" rows="1" placeholder="Ask anything..."></textarea>
+    <button class="send" onclick="send()">Send</button>
+  </footer>
+</main>
+<div id="panel"><div class="ph"><span id="ptitle"></span><button class="ic" onclick="closePanel()" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div id="pbody"></div></div>
+<div id="toast" role="status"></div>
+<script src="/static/app.js?v=5"></script></body></html>
