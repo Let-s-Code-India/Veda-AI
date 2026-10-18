@@ -6,8 +6,6 @@
 Bring a free Groq API key. No account, no cloud server, no model picking.<br>
 Works on Android (Termux), Windows, macOS and Linux.</p>
 
-<p align="center"><a href="README.hi.md">हिंदी में पढ़ें</a></p>
-
 ---
 
 ## What is this?
