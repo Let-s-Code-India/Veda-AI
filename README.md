@@ -94,13 +94,15 @@ Type your key after `GROQ_API_KEY=`. Save with **Ctrl + O**, **Enter**, then exi
 4. Start the app:
 
 ```bash
-./start.sh
+bash start.sh
 ```
+
+(You can also run `python app.py`. It does the same thing.)
 
 5. Open **Chrome** and go to `http://localhost:5000`.
 
 Tips for Termux:
-- To stop the app press **Ctrl + C**. To start again later: `cd YOUR-REPO && ./start.sh`
+- To stop the app press **Ctrl + C**. To start again later: `cd Veda-AI && bash start.sh`
 - Pull down the Termux notification and tap **Acquire wakelock** so Android does not stop it in the background.
 - If `pkg install ffmpeg` shows a `CANNOT LINK EXECUTABLE` error, run `pkg upgrade -y` and then `pkg install -y ffmpeg` again.
 
@@ -111,8 +113,8 @@ Tips for Termux:
 3. Open **PowerShell** and run:
 
 ```powershell
-git clone https://github.com/YOUR-ORG/YOUR-REPO.git
-cd YOUR-REPO
+git clone https://github.com/Let-s-Code-India/Veda-AI.git
+cd Veda-AI
 .\install.bat
 ```
 
@@ -128,14 +130,14 @@ notepad .env
 ### Linux and macOS
 
 ```bash
-git clone https://github.com/YOUR-ORG/YOUR-REPO.git
-cd YOUR-REPO
+git clone https://github.com/Let-s-Code-India/Veda-AI.git
+cd Veda-AI
 bash install.sh
 nano .env          # paste your key after GROQ_API_KEY=
-./start.sh
+bash start.sh
 ```
 
-Then open `http://localhost:5000`.
+Then open `http://localhost:5000`. If `bash start.sh` does not work, run `python3 app.py`.
 
 ### Manual install (any system)
 
@@ -226,6 +228,7 @@ Your `.env` and `memory.db` are never touched, because they are not part of the 
 | Image answer fails | Make sure `MODEL_DRISHTI` is a model that supports image input |
 | Audio or video fails | Install ffmpeg (see table above). Files over 100 MB are rejected |
 | Voice button says microphone unavailable | Open the app at `http://localhost:5000`, and allow the microphone in Chrome |
+| `./start.sh: Permission denied` | Run it with `bash start.sh`, or run `python app.py` |
 | Termux: `CANNOT LINK EXECUTABLE` | Run `pkg upgrade -y` and install the package again |
 | Changes in `.env` ignored | Save the file. Port/host/password need a restart |
 
