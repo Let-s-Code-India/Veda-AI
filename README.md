@@ -6,6 +6,8 @@
 Bring a free Groq API key. No account, no cloud server, no model picking.<br>
 Works on Android (Termux), Windows, macOS and Linux.</p>
 
+<p align="center">Created by <b>Ayush Giri</b> &middot; <a href="https://github.com/Let-s-Code-India">Let's Code India</a> &middot; <a href="mailto:EMAIL_HERE">EMAIL_HERE</a></p>
+
 ---
 
 ## What is this?
@@ -263,8 +265,21 @@ Replace `logo.svg` in the project folder with your own SVG. It is used in the si
 
 ## Contributing
 
-Issues and pull requests are welcome. Keep it simple: one small change per pull request, and test it on a phone-sized screen. To add an agent, add an entry to `agents.py` and a `LEVEL_` line to `.env.example`.
+Issues and pull requests are welcome. Keep it simple: one small change per pull request, and test it on a phone-sized screen.
+The `main` branch is protected: every change goes through a pull request that the maintainer reviews and approves. To add an agent, add an entry to `agents.py` and a `LEVEL_` line to `.env.example`.
 
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+## Credits and attribution
+
+**Veda AI** is created and maintained by **Ayush Giri** of [Let's Code India](https://github.com/Let-s-Code-India).
+
+Contact: [EMAIL_HERE](mailto:EMAIL_HERE)
+
+The MIT license lets anyone use, copy and build on this project, including indexing it in code search tools or AI reference libraries, as long as the copyright notice stays with it. If you do, please credit it as:
+
+> Veda AI by Ayush Giri, Let's Code India. <https://github.com/Let-s-Code-India/Veda-AI>
+
+Please link back to this repository instead of presenting copies as the original, and do not change the credit line. If you want your project listed here, or want something removed, write to the email above.
