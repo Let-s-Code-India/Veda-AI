@@ -6,7 +6,7 @@
 Bring a free Groq API key. No account, no cloud server, no model picking.<br>
 Works on Android (Termux), Windows, macOS and Linux.</p>
 
-<p align="center">Created by <b>Ayush Giri</b>, founder of <a href="https://github.com/Let-s-Code-India">Let's Code India</a> &middot; <a href="mailto:YOUR-EMAIL@example.com">YOUR-EMAIL@example.com</a></p>
+<p align="center">Created by <b>Ayush Giri</b>, founder of <a href="https://github.com/Let-s-Code-India">Let's Code India</a> &middot; <a href="mailto:ayushgiri.ai.21@gmail.com">YOUR-EMAIL@example.com</a></p>
 
 ---
 
