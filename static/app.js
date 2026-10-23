@@ -114,16 +114,19 @@ async function loadPlatformInfo() {
   try {
     platformInfo = await api('/api/platform');
   } catch (e) {
-    platformInfo = {platform: 'unknown', is_mobile: false};
+    platformInfo = {platform: 'unknown', is_mobile: false, is_ish: false, shell: 'browser'};
   }
 }
 
 function welcome() {
   const installHint = platformInfo.is_mobile
-    ? '<p>Install this as a home-screen app from your browser menu for the smoothest mobile experience.</p>'
+    ? (platformInfo.is_ish
+      ? '<p>iSH on iOS is supported for running the service in a Linux shell. Use the iSH terminal on the same device, then open the app from the local address.</p>'
+      : '<p>Install this as a home-screen app from your browser menu for the smoothest mobile experience.</p>')
     : '<p>Sarathi reads each message and sends it to the right agent and model. Or pick an agent yourself.</p>';
-  log.innerHTML = '<div class="welcome"><img class="logo" src="/logo.svg" alt="" onerror="this.style.display=\'none\'"><h2>Namaste</h2>' +
-    installHint + '<div class="cards">' +
+  const shellLabel = platformInfo.is_ish ? 'iSH shell on iOS' : platformInfo.platform === 'android' ? 'Android' : platformInfo.platform === 'ios' ? 'iOS Safari' : 'Desktop browser';
+  log.innerHTML = '<div class="welcome"><img class="logo" src="/logo.svg" alt="" onerror="this.style.display=\'none\'"><h2>Welcome</h2>' +
+    '<p class="mut">Runtime: ' + esc(shellLabel) + '</p>' + installHint + '<div class="cards">' +
     agents.filter(a => !a.custom).map(a => '<button class="ac" onclick="pick(\'' + a.key + '\')">' + ava(a.key, a.name) +
       '<span><b>' + esc(a.name) + '</b><small>' + esc(a.role) + '</small></span></button>').join('') + '</div></div>';
 }

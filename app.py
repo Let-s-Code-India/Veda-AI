@@ -74,7 +74,9 @@ def platform():
     ua = request.headers.get("User-Agent", "")
     kind = core.platform_kind(ua)
     is_mobile = kind in {"ios", "android"}
-    return jsonify(platform=kind, is_mobile=is_mobile, is_ios=kind == "ios", is_android=kind == "android")
+    is_ish = "ish" in ua.lower()
+    return jsonify(platform=kind, is_mobile=is_mobile, is_ios=kind == "ios", is_android=kind == "android",
+                   is_ish=is_ish, shell="ish" if is_ish else "browser")
 
 
 @app.get("/api/status")

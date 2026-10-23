@@ -51,7 +51,7 @@ def api_key():
 
 def platform_kind(user_agent=""):
     ua = (user_agent or "").lower()
-    if "ipad" in ua or "iphone" in ua or "ipod" in ua:
+    if "ish" in ua or "ipad" in ua or "iphone" in ua or "ipod" in ua:
         return "ios"
     if "android" in ua:
         return "android"

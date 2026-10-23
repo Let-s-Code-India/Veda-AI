@@ -32,12 +32,64 @@ The result is a secure local-first architecture: the app stays on your device, y
 | Platform | Recommended path | Notes |
 |---|---|---|
 | iPhone / iPad | Safari -> Add to Home Screen | Works as a PWA, not a native binary |
+| iOS via iSH shell | Install iSH, then run the app inside the Linux environment | Good for users who want a Linux shell and local Python runtime on iOS |
 | Android | Chrome -> Install app / use Termux | Works as a PWA or a local Termux install |
 | Windows | Local Python app or run the `.bat` scripts | Best for desktop use |
 | macOS | Local Python app or run the shell scripts | Best for local workstation use |
 | Linux | Local Python app or run the shell scripts | Great for headless or local server deployments |
 
 Important: the app is a local web app with mobile installability. If you want a native iOS/Android app store app, that requires a separate wrapper project such as Capacitor, React Native, or a custom shell for each platform.
+
+### iOS with iSH shell
+
+If you want to run this app inside iOS using the iSH shell app:
+
+```bash
+apk update
+apk add --no-cache git python3 py3-pip
+git clone https://github.com/Let-s-Code-India/Veda-AI.git
+cd Veda-AI
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+```
+
+Then edit `.env` and add your Groq key:
+
+```bash
+nano .env
+```
+
+Start the app:
+
+```bash
+python3 app.py
+```
+
+Open the service from inside the iSH environment with:
+
+```bash
+curl http://127.0.0.1:5000
+```
+
+or access the server from the same local network if the container is bound to `HOST=0.0.0.0`. Safari on iOS may not reach the iSH loopback the same way a desktop browser would, so the most reliable iSH workflow is usually to use the local shell for setup and local testing while keeping the server bound to a LAN address when needed.
+
+### Android (Termux)
+
+```bash
+pkg update -y && pkg upgrade -y
+pkg install -y python git
+git clone https://github.com/Let-s-Code-India/Veda-AI.git
+cd Veda-AI
+bash install.sh
+```
+
+Then set your API key and run:
+
+```bash
+bash start.sh
+```
 
 ## Quick start
 

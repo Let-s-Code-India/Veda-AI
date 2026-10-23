@@ -10,9 +10,10 @@ if ROOT not in sys.path:
 import core
 
 
-def test_platform_kind_handles_ipad_and_android():
+def test_platform_kind_handles_ipad_android_and_ish():
     assert core.platform_kind("Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X)") == "ios"
     assert core.platform_kind("Mozilla/5.0 (Linux; Android 14; Pixel 8)") == "android"
+    assert core.platform_kind("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) ish/1.0") == "ios"
     assert core.platform_kind("Mozilla/5.0 (X11; Linux x86_64)") == "linux"
 
 
