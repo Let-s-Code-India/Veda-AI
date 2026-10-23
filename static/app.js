@@ -1,7 +1,7 @@
 const $ = id => document.getElementById(id);
 let conv = 0, agent = 'auto', agents = [], file = null, busy = false, deep = false;
 let convData = {items: [], period: 2592000, period_label: '30 days', enabled: true};
-let memCache = {}, rec = null, recChunks = [];
+let memCache = {}, rec = null, recChunks = [], platformInfo = {platform: 'unknown', is_mobile: false};
 const RAW = [];
 const log = $('log'), q = $('q'), fileIn = $('fileIn');
 const COL = {vishwakarma:'#51308f', saraswati:'#b3263e', valmiki:'#c2476a', chanakya:'#2f4b9c', aryabhata:'#2a7fa8',
@@ -110,9 +110,20 @@ function chips() {
   $('sub').textContent = cur ? cur.role : 'Sarathi picks the best agent for each message';
 }
 function pick(k) { agent = k; chips(); q.focus(); }
+async function loadPlatformInfo() {
+  try {
+    platformInfo = await api('/api/platform');
+  } catch (e) {
+    platformInfo = {platform: 'unknown', is_mobile: false};
+  }
+}
+
 function welcome() {
+  const installHint = platformInfo.is_mobile
+    ? '<p>Install this as a home-screen app from your browser menu for the smoothest mobile experience.</p>'
+    : '<p>Sarathi reads each message and sends it to the right agent and model. Or pick an agent yourself.</p>';
   log.innerHTML = '<div class="welcome"><img class="logo" src="/logo.svg" alt="" onerror="this.style.display=\'none\'"><h2>Namaste</h2>' +
-    '<p>Sarathi reads each message and sends it to the right agent and model. Or pick an agent yourself.</p><div class="cards">' +
+    installHint + '<div class="cards">' +
     agents.filter(a => !a.custom).map(a => '<button class="ac" onclick="pick(\'' + a.key + '\')">' + ava(a.key, a.name) +
       '<span><b>' + esc(a.name) + '</b><small>' + esc(a.role) + '</small></span></button>').join('') + '</div></div>';
 }
@@ -350,6 +361,7 @@ async function setPeriod(v) { try { await post('/api/settings', {cleanup_secs: p
 /* ---------- start ---------- */
 (async () => {
   try {
+    await loadPlatformInfo();
     const c = await api('/api/config');
     $('appName').textContent = c.name; $('appTag').textContent = c.tagline; document.title = c.name;
     if (!c.name) $('appName').style.display = 'none';

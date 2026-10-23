@@ -21,6 +21,10 @@ DEFAULT_MODELS = {
 UA = {"User-Agent": "Mozilla/5.0 (VedaAI)"}
 
 
+class UserError(Exception):
+    """An expected failure that is safe and useful to show to the user."""
+
+
 # ---------------------------------------------------------------- settings
 def load_env():
     """Read .env on every call so model names can be changed without a restart."""
@@ -43,6 +47,21 @@ def env(k, d=""):
 
 def api_key():
     return env("GROQ_API_KEY").strip()
+
+
+def platform_kind(user_agent=""):
+    ua = (user_agent or "").lower()
+    if "ipad" in ua or "iphone" in ua or "ipod" in ua:
+        return "ios"
+    if "android" in ua:
+        return "android"
+    if "windows" in ua:
+        return "windows"
+    if "mac os" in ua or "darwin" in ua:
+        return "macos"
+    if "linux" in ua:
+        return "linux"
+    return "unknown"
 
 
 def model_for(level):
@@ -77,7 +96,7 @@ def _friendly(status, msg):
 
 def chat(model, messages, temp=0.7):
     if not api_key():
-        raise Exception("No API key found. Add GROQ_API_KEY to your .env file (see the README).")
+        raise UserError("No API key found. Add GROQ_API_KEY to your .env file (see the README).")
     err = "unknown error"
     isimg = isinstance(messages[-1].get("content"), list)
     tries = [model] if isimg else list(dict.fromkeys([model, model_for("sutra")]))
@@ -103,24 +122,24 @@ def chat(model, messages, temp=0.7):
         except requests.exceptions.RequestException as e:
             err = "Could not reach Groq. Check your internet connection. (%s)" % e.__class__.__name__
             break
-    raise Exception(err)
+    raise UserError(err)
 
 
 def transcribe(data, filename, is_video=False):
     if not api_key():
-        raise Exception("No API key found. Add GROQ_API_KEY to your .env file (see the README).")
+        raise UserError("No API key found. Add GROQ_API_KEY to your .env file (see the README).")
     data, name = media.prepare_audio(data, filename, is_video)
     try:
         r = requests.post(API + "/audio/transcriptions", headers={"Authorization": "Bearer " + api_key()},
                           timeout=300, files={"file": (name, data)}, data={"model": model_for("shruti")})
     except requests.exceptions.RequestException as e:
-        raise Exception("Could not reach Groq. Check your internet connection. (%s)" % e.__class__.__name__)
+        raise UserError("Could not reach Groq. Check your internet connection. (%s)" % e.__class__.__name__)
     if r.status_code != 200:
         try:
             msg = r.json().get("error", {}).get("message", r.text[:200])
         except Exception:
             msg = r.text[:200]
-        raise Exception("Transcription failed: " + _friendly(r.status_code, msg))
+        raise UserError("Transcription failed: " + _friendly(r.status_code, msg))
     return (r.json().get("text") or "").strip()
 
 
@@ -262,7 +281,7 @@ def council(sysmsg, msgs, question):
         ra, rb = fa.result(), fb.result()
     drafts = [r for r in (ra, rb) if r]
     if not drafts:
-        raise Exception("Both models failed. Check the model names in your .env file.")
+        raise UserError("Both models failed. Check the model names in your .env file.")
     if len(drafts) == 1:
         return drafts[0][0], "one draft: " + drafts[0][1].split("/")[-1]
     merge = [{"role": "system", "content": sysmsg},
@@ -297,7 +316,7 @@ def respond(conv, key, text, f, deep=False):
     load_env()
     c = db.q("SELECT id, title, summary FROM convs WHERE id=? AND deleted_at IS NULL", (conv,), one=True)
     if not c:
-        raise Exception("This chat no longer exists. Start a new chat.")
+        raise UserError("This chat no longer exists. Start a new chat.")
     ags = all_agents()
     image, extra, kind = None, "", ""
     if f:

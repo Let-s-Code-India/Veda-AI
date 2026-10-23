@@ -35,10 +35,14 @@ def on_error(e):
     if code == 413:
         msg = "File is too large (limit 100 MB)."
     if request.path.startswith("/api/"):
+        if code >= 500:
+            app.logger.exception("Unhandled API error", exc_info=e)
+            msg = "An unexpected server error occurred. Check the server log for details."
         return jsonify(error=msg), code
     if isinstance(e, HTTPException):
         return e
-    return Response("Server error: " + msg, 500)
+    app.logger.exception("Unhandled request error", exc_info=e)
+    return Response("Internal server error", 500)
 
 
 def body():
@@ -63,6 +67,14 @@ def config():
     core.load_env()
     return jsonify(name=core.env("APP_NAME", "Veda AI"), tagline=core.env("APP_TAGLINE", "Your team of minds"),
                    version=core.VERSION)
+
+
+@app.get("/api/platform")
+def platform():
+    ua = request.headers.get("User-Agent", "")
+    kind = core.platform_kind(ua)
+    is_mobile = kind in {"ios", "android"}
+    return jsonify(platform=kind, is_mobile=is_mobile, is_ios=kind == "ios", is_android=kind == "android")
 
 
 @app.get("/api/status")
@@ -268,8 +280,11 @@ def chat():
         return jsonify(out)
     except media.MediaError as e:
         return jsonify(error=str(e)), 400
-    except Exception as e:
+    except core.UserError as e:
         return jsonify(error=str(e)), 500
+    except Exception:
+        app.logger.exception("Chat request failed")
+        return jsonify(error="An unexpected server error occurred. Check the server log for details."), 500
 
 
 @app.post("/api/transcribe")
@@ -281,8 +296,11 @@ def transcribe():
         text = core.transcribe(f.read(), f.filename or "voice.webm")
     except media.MediaError as e:
         return jsonify(error=str(e)), 400
-    except Exception as e:
+    except core.UserError as e:
         return jsonify(error=str(e)), 500
+    except Exception:
+        app.logger.exception("Transcription request failed")
+        return jsonify(error="An unexpected server error occurred. Check the server log for details."), 500
     return jsonify(text=text)
 
 
