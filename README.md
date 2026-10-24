@@ -1,48 +1,244 @@
 # Veda AI
 
-Veda AI is a self-hosted local AI workspace: a web application that runs on your own machine and lets you chat with a set of specialist agents, attach documents and media, and keep memory on-device.
+<p align="center">
+  <img src="logo.svg" alt="Veda AI logo" width="120">
+</p>
 
-This project is designed as a local-first, browser-based experience with mobile install support. It is not a native app binary for iPhone, iPad, Android, Windows, or macOS. Instead, it runs as a local Python service with a responsive web UI that can be installed as a PWA on mobile devices and used as a desktop app on laptops and workstations.
+Veda AI is a self-hosted, local-first AI workspace. Run it as a Python web application on your own computer or server, then use a browser to chat with a team of specialist AI agents, work with documents and media, and keep chat history and skill memory in a local SQLite database.
 
-## What this project does
+The browser interface is responsive and can be installed as a Progressive Web App (PWA) on supported mobile browsers. Veda AI is **not** a native iOS, Android, Windows, or macOS application. Model requests are sent to Groq; the web application and its local database run on the machine where you start the server.
 
-- Routes each prompt to the most relevant specialist agent
-- Supports file uploads including images, PDFs, audio, video, and text/code files
-- Supports Groq-backed model calls with a single API key in `.env`
-- Stores conversations and skill memory in a local SQLite database
-- Runs on desktop and mobile browsers through a responsive web interface
-- Can be exposed to devices on the same LAN with `HOST=0.0.0.0`
-- Works well as a local AI workspace for day-to-day use, prototyping, and private document analysis
+## Contents
 
-## Architecture
+- [Highlights](#highlights)
+- [How it works](#how-it-works)
+- [Built-in agents](#built-in-agents)
+- [Requirements](#requirements)
+- [Quick start](#quick-start)
+- [Configuration](#configuration)
+- [Using Veda AI](#using-veda-ai)
+- [Supported platforms](#supported-platforms)
+- [Privacy and security](#privacy-and-security)
+- [Troubleshooting](#troubleshooting)
+- [Development and project layout](#development-and-project-layout)
+- [Contributing](#contributing)
+- [License](#license)
 
-The project is intentionally simple and privacy-focused:
+## Highlights
 
-- `app.py` hosts the Flask API and web app
-- `core.py` contains model routing, memory, and platform-aware logic
-- `agents.py` defines the built-in specialist agents and routing prompt behavior
-- `db.py` stores chat history, skill memory, custom agents, and settings in SQLite
-- `media.py` handles PDFs, media conversion, and file preparation
-- `static/` contains the HTML, CSS, and JavaScript frontend
+- **A team of specialist agents:** ask Veda AI to route a prompt or choose an agent for coding, research, writing, tutoring, and more.
+- **Configurable models:** use Groq-hosted models with a single API key, and override model IDs or agent depth in `.env`.
+- **Documents and media:** work with text and code files, extract selectable text from PDFs, ask questions about images, and transcribe supported audio or video.
+- **Local persistence:** chat history, settings, custom agents, and skill memory are stored in SQLite on the server machine.
+- **Custom agents:** create agents with your own role and instructions, then import or export their definitions.
+- **Mobile-friendly access:** use the responsive browser UI, install it as a PWA where supported, or access it from another device on your LAN.
+- **Portable setup:** shell scripts support Linux, macOS, and Termux; Windows batch scripts are included.
 
-The result is a secure local-first architecture: the app stays on your device, your SQLite data stays on your device, and only the model requests leave your device to Groq.
+## How it works
 
-## Platform support matrix
+Veda AI is a local web application with a hosted model provider:
 
-| Platform | Recommended path | Notes |
+1. Start the Python service on your computer or server.
+2. Open the service in a browser and send a prompt, optionally with supported files.
+3. Veda AI selects or uses the relevant specialist agent and calls the configured Groq model.
+4. Chat history and app data are saved to the configured local SQLite database.
+
+The server and database stay on the host running Veda AI, but prompts, attached content needed for inference, and transcription requests are sent to Groq. This is not offline inference. Review Groq's current policies and the sensitivity of your data before submitting private content.
+
+### Technical stack
+
+| Component | Implementation |
 |---|---|---|
-| iPhone / iPad | Safari -> Add to Home Screen | Works as a PWA, not a native binary |
-| iOS via iSH shell | Install iSH, then run the app inside the Linux environment | Good for users who want a Linux shell and local Python runtime on iOS |
-| Android | Chrome -> Install app / use Termux | Works as a PWA or a local Termux install |
-| Windows | Local Python app or run the `.bat` scripts | Best for desktop use |
-| macOS | Local Python app or run the shell scripts | Best for local workstation use |
-| Linux | Local Python app or run the shell scripts | Great for headless or local server deployments |
+| Backend | Python, Flask, Waitress dependency |
+| Model provider | Groq API, using chat completions and audio transcription endpoints |
+| Data storage | SQLite |
+| Frontend | HTML, CSS, JavaScript |
+| Optional media conversion | ffmpeg or the optional `imageio-ffmpeg` package |
+| PDF text extraction | `pypdf` |
 
-Important: the app is a local web app with mobile installability. If you want a native iOS/Android app store app, that requires a separate wrapper project such as Capacitor, React Native, or a custom shell for each platform.
+## Built-in agents
+
+Veda AI includes focused agents that can use different model-depth levels. Agent model assignments can be changed in `.env`.
+
+| Agent | Focus |
+|---|---|
+| Vishwakarma | Software development, code, debugging, scripts, and APIs |
+| Saraswati | Stories, screenplays, characters, and creative writing |
+| Valmiki | Poetry, shayari, lyrics, and captions |
+| Chanakya | Strategy, decisions, explanations, and general questions |
+| Aryabhata | Mathematics and science |
+| Dronacharya | Tutoring, study help, and exam preparation |
+| Dhanvantari | Health and wellness information |
+| Kubera | Business, money concepts, and careers |
+| Vidura | Critique, review, and identifying gaps or risks |
+| Panini | Translation, grammar, and language assistance |
+| Narada | Links, web pages, and research based on provided page content |
+| Sanjaya | Summaries of long text and files |
+| Chitragupta | Notes, lists, tables, and data organization |
+| Drishti | Image understanding |
+| Shruti | Audio and video transcription workflows |
+
+You can also add custom agents in the app. Agent responses are AI-generated and should be checked, especially for high-impact decisions.
+
+## Quick start
+
+### Requirements
+
+- Python 3.10 or newer
+- A Groq API key for model and transcription requests
+- Git, if you are cloning the repository
+- A current browser to use the interface
+- Optional: ffmpeg for converting some less common or larger media formats
+
+### 1) Install dependencies
+
+On Linux, macOS, and Android Termux:
+
+```bash
+git clone https://github.com/Let-s-Code-India/Veda-AI.git
+cd Veda-AI
+bash install.sh
+```
+
+On Windows, use PowerShell or Command Prompt:
+
+```powershell
+git clone https://github.com/Let-s-Code-India/Veda-AI.git
+cd Veda-AI
+.\install.bat
+```
+
+The installer installs the Python requirements and creates `.env` from `.env.example` if it does not exist. On supported desktop Unix systems it also creates a `.venv` virtual environment. Termux uses its system Python environment.
+
+### 2) Configure your API key
+
+If the installer did not create `.env`, copy the example:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and set your key:
+
+```dotenv
+GROQ_API_KEY=gsk_your_key_here
+```
+
+Keep this key private. Do not commit or share `.env`.
+
+### 3) Start Veda AI
+
+On Linux, macOS, and Termux:
+```bash
+bash start.sh
+```
+
+On Windows:
+
+```powershell
+start.bat
+```
+
+Open the local address:
+
+- `http://127.0.0.1:5000` or `http://localhost:5000` on the same device.
+- `http://<your-local-ip>:5000` from another device on your LAN after enabling LAN access as described below.
+
+You can also start the server directly with `python app.py` (or `python3 app.py` on systems where that is the Python 3 command).
+
+## Configuration
+
+Veda AI reads settings from `.env` in the project directory. The sample file documents the supported values:
+
+| Variable | Purpose | Example / default |
+|---|---|---|
+| `GROQ_API_KEY` | Groq credential; required for model requests | Set your own key |
+| `HOST` | Interface to bind the web server to | `127.0.0.1` |
+| `PORT` | Port used by the web server | `5000` |
+| `APP_PASSWORD` | Optional HTTP Basic password, useful for LAN access | Empty (disabled) |
+| `APP_NAME` | Name shown in the interface | `Veda AI` |
+| `APP_TAGLINE` | Secondary app label | `Your team of minds` |
+| `MODEL_SUTRA` | Fast-level model ID | `openai/gpt-oss-20b` |
+| `MODEL_SHLOKA` | Balanced-level model ID | `qwen/qwen3.8-27b` |
+| `MODEL_VEDA` | Deep-level model ID | `openai/gpt-oss-120b` |
+| `MODEL_SARATHI` | Routing model ID | `openai/gpt-oss-20b` |
+| `MODEL_DRISHTI` | Image model ID | `qwen/qwen3.8-27b` |
+| `MODEL_SHRUTI` | Transcription model ID | `whisper-large-v3-turbo` |
+| `LEVEL_<AGENT>` | Model depth for a built-in agent (`sutra`, `shloka`, or `veda`) | See `.env.example` |
+| `DB_PATH` | SQLite database path | `memory.db` |
+
+The model IDs above are example defaults and may change or become unavailable. Check the current Groq model catalog if an ID is rejected, then update the corresponding variable. The application loads environment settings dynamically for model/agent configuration, though restarting after configuration changes is a reliable way to apply them consistently.
+
+### Enable access from other devices
+
+By default, the server binds to `127.0.0.1`, so it is available only on the host machine. To allow devices on the same trusted local network to connect, set:
+
+```dotenv
+HOST=0.0.0.0
+PORT=5000
+APP_PASSWORD=use-a-long-unique-password
+```
+
+Restart Veda AI, find the host's LAN IP address, and open `http://<your-local-ip>:5000` on the other device. Use a strong password and firewall rules appropriate for your network. Do not expose this development server directly to the public internet.
+
+## Using Veda AI
+
+### Chat and agent selection
+
+Start a conversation in the browser and select a specialist agent or use the router to direct your request. Agents have model levels for fast, balanced, and deep responses. The selected model and agent can be adjusted through the app and `.env` configuration.
+
+### Files, documents, and media
+
+Veda AI supports file workflows for images, PDFs, audio, video, and text/code files. Processing depends on file type and configured model:
+
+- **PDFs:** selectable text is extracted with `pypdf`; scanned pages without a text layer need to be provided as images. Extraction is bounded and does not perform OCR.
+- **Images:** sent to the image-capable model; larger images may be resized when ffmpeg is available.
+- **Audio and video:** audio is sent to the configured transcription model. Video workflows extract audio; the transcript agent does not analyze the video's visuals.
+- **Text and code:** attach content for summarization, explanation, review, or other supported chat tasks.
+
+The service enforces a 100 MB request limit, and model/provider limits may be lower. Files processed for model responses are transmitted to Groq.
+
+### Memory, history, and exports
+
+Chat history and app settings are stored in the SQLite database. Skill memory is shared across agents and is separate from an individual chat summary. The interface provides chat and app export, as well as custom-agent import/export. Back up the database and exports yourself if you need to preserve them.
+
+Automatic chat cleanup is enabled by default. The cleanup interval and enablement can be changed in the app's settings. Pinned chats are excluded from automatic cleanup; deleted items have a short undo window before permanent deletion.
+
+## Supported platforms
+
+Veda AI is a Python web service rather than a native app. Use a browser on the server itself, or connect over a trusted LAN.
+
+| Platform | Recommended use | Notes |
+|---|---|---|
+| Linux | Local browser or self-hosted machine | Shell setup and launcher included |
+| macOS | Local browser on a workstation | Shell setup and launcher included |
+| Windows | Local browser on a workstation | Batch setup and launcher included |
+| Android | Chrome PWA or Termux | Browser PWA or local Python service |
+| iPhone / iPad | Safari PWA or iSH shell | Add to Home Screen; not a native app |
+
+### Install the web app on mobile
+
+1. Start Veda AI on the computer or phone that will host the service.
+2. Open its address in Safari on iPhone/iPad or Chrome on Android.
+3. Use the browser's **Add to Home Screen** or **Install app** action when available.
+4. Launch the saved shortcut. The server must remain running on the host.
+
+### Android Termux installation
+
+```bash
+pkg update -y && pkg upgrade -y
+pkg install -y python git
+git clone https://github.com/Let-s-Code-India/Veda-AI.git
+cd Veda-AI
+bash install.sh
+bash start.sh
+```
+
+Before starting, edit `.env` and provide `GROQ_API_KEY`. Open the local address in the Android browser.
 
 ### iOS with iSH shell
 
-If you want to run this app inside iOS using the iSH shell app:
+If you want to run the Python service inside the iOS iSH shell app, install the available packages and clone the repository:
 
 ```bash
 apk update
@@ -55,53 +251,16 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Then edit `.env` and add your Groq key:
+Edit `.env` and add your Groq key, then start the app:
 
 ```bash
 nano .env
-```
-
-Start the app:
-
-```bash
 python3 app.py
 ```
 
-Open the service from inside the iSH environment with:
+Open `http://127.0.0.1:5000` from the iSH environment to check that the service responds. Browser access to iSH loopback can vary; LAN access may work better when the server is bound to `HOST=0.0.0.0`. Be aware that iSH has its own resource and compatibility limitations.
 
-```bash
-curl http://127.0.0.1:5000
-```
-
-or access the server from the same local network if the container is bound to `HOST=0.0.0.0`. Safari on iOS may not reach the iSH loopback the same way a desktop browser would, so the most reliable iSH workflow is usually to use the local shell for setup and local testing while keeping the server bound to a LAN address when needed.
-
-### Android (Termux)
-
-```bash
-pkg update -y && pkg upgrade -y
-pkg install -y python git
-git clone https://github.com/Let-s-Code-India/Veda-AI.git
-cd Veda-AI
-bash install.sh
-```
-
-Then set your API key and run:
-
-```bash
-bash start.sh
-```
-
-## Quick start
-
-### 1) Install dependencies
-
-```bash
-git clone https://github.com/Let-s-Code-India/Veda-AI.git
-cd Veda-AI
-bash install.sh
-```
-
-On Windows:
+### Windows setup
 
 ```powershell
 git clone https://github.com/Let-s-Code-India/Veda-AI.git
@@ -109,232 +268,102 @@ cd Veda-AI
 .\install.bat
 ```
 
-### 2) Add your API key
+Edit `.env` with a text editor, add your Groq key, and run `start.bat`.
 
-Copy `.env.example` to `.env` and add your Groq API key:
+## Privacy and security
 
-```bash
-cp .env.example .env
-```
-
-Then edit `.env` and set:
-
-```dotenv
-GROQ_API_KEY=gsk_your_key_here
-```
-
-### 3) Start the app
-
-```bash
-bash start.sh
-```
-
-or on Windows:
-
-```powershell
-start.bat
-```
-
-Open:
-
-- `http://localhost:5000` on the same device
-- `http://<your-local-ip>:5000` from other devices on your LAN when `HOST=0.0.0.0`
-
-## Mobile install and cross-device use
-
-### iPhone and iPad
-
-1. Start the app on the machine it is running on.
-2. Open the app in Safari on the iPhone or iPad.
-3. Tap the Share button.
-4. Choose Add to Home Screen.
-5. Launch it from the home screen.
-
-This gives you an app-like experience, but the backend still runs on your local machine or LAN.
-
-### Android
-
-1. Run the app on your local machine or Termux environment.
-2. Open the app in Chrome.
-3. Use the browser menu to Install app or Add to Home Screen.
-4. Launch the icon like a normal app.
-
-### Desktop use
-
-Use the browser directly or install a lightweight wrapper like a local browser shortcut or desktop launcher. The app already exposes a responsive interface and works well on desktop browsers without any extra platform code.
-
-### LAN / network access
-
-For other devices on the same network:
-
-```dotenv
-HOST=0.0.0.0
-APP_PASSWORD=choose-a-strong-password
-```
-
-Then restart the app and open the displayed LAN IP, such as:
-
-```text
-http://192.168.1.15:5000
-```
-
-This is useful for tablets, phones, or laptops on the same network.
-
-## Environment and settings
-
-The primary runtime settings live in `.env`:
-
-| Setting | Purpose |
-|---|---|
-| `GROQ_API_KEY` | Required Groq API key |
-| `PORT` | The port used by the app |
-| `HOST` | Local-only or LAN-accessible binding |
-| `APP_PASSWORD` | Optional basic auth for networked access |
-| `APP_NAME` | Branding shown in the UI |
-| `APP_TAGLINE` | Secondary brand text |
-| `MODEL_*` | Override Groq model names |
-| `LEVEL_*` | Agent depth selection |
-| `DB_PATH` | Database file location |
-
-A full example is in `.env.example`.
-
-## Features
-
-- Specialist agent routing with Sarathi
-- Model-level routing and deep-answer modes
-- Chat export and full app export
-- Skill memory that persists across chats
-- Custom agent creation and import/export
-- Voice transcription support for local microphone input
-- Local SQLite chat history and settings
-- Multi-device LAN access with an optional password
-- Light and dark themes
-
-## Operating system notes
-
-### Android (Termux)
-
-```bash
-pkg update -y && pkg upgrade -y
-pkg install -y python git
-git clone https://github.com/Let-s-Code-India/Veda-AI.git
-cd Veda-AI
-bash install.sh
-```
-
-Then edit `.env`, start the app, and visit the local address in Chrome.
-
-### Windows
-
-1. Install Python 3.10+
-2. Install Git
-3. Run:
-
-```powershell
-git clone https://github.com/Let-s-Code-India/Veda-AI.git
-cd Veda-AI
-.\install.bat
-```
-
-### macOS and Linux
-
-```bash
-git clone https://github.com/Let-s-Code-India/Veda-AI.git
-cd Veda-AI
-bash install.sh
-nano .env
-bash start.sh
-```
+- The SQLite database is stored on the machine running the app (by default, `memory.db` alongside the project).
+- Model prompts, relevant uploaded content, and audio transcription requests are sent to Groq for processing. Local hosting does not mean offline or provider-free inference.
+- Keep `.env` private; it contains your API key and may contain your LAN password. Do not commit it or include it in public backups.
+- The app blocks unsafe private/local destinations when it fetches URL-based content, but this does not replace careful network configuration.
+- `APP_PASSWORD` is optional and disabled when empty. Set it before enabling LAN access.
+- Restrict LAN use to trusted networks. The included server setup is intended for personal/local use, not direct public production deployment.
+- AI responses can be incorrect. Do not treat them as medical, legal, or financial advice.
 
 ## Troubleshooting
 
 ### App will not start
 
-- Ensure Python dependencies are installed
-- Confirm `.env` exists and contains a valid `GROQ_API_KEY`
-- Check whether the port is already in use
+- Confirm Python 3.10 or newer is installed and install dependencies with `bash install.sh` or `.\install.bat`.
+- Make sure `.env` exists. For model requests, make sure `GROQ_API_KEY` contains a valid key.
+- Check whether another process is using the configured port, then change `PORT` if needed.
+- On Unix, try `bash start.sh`; if you installed dependencies in a virtual environment manually, activate it first.
 
 ### Browser cannot connect
 
-- Confirm the app is still running
-- Check `HOST` and `PORT` values in `.env`
-- If using LAN access, ensure the device is on the same network and the firewall allows the port
+- Confirm the app process is still running and use the correct `PORT`.
+- For same-device access, use `http://127.0.0.1:<port>`.
+- For another device, set `HOST=0.0.0.0`, use the server's LAN IP, and check that both devices share a network and the firewall allows the port.
+- A PWA shortcut does not host the backend; the server machine still needs to be running.
 
 ### Model errors
 
-Groq frequently renames models. If you see a model mismatch error:
+If Groq reports that a model does not exist or is unavailable:
 
-1. Open the Groq model list in the dashboard
-2. Copy the current model identifier
-3. Update `.env` and restart if needed
+1. Check the current model IDs available to your Groq account.
+2. Set the relevant `MODEL_*` value in `.env` to a supported ID.
+3. Retry. Rate limits and provider availability can also affect requests.
+
+For authentication errors, confirm that `GROQ_API_KEY` is correct and has not been revoked.
 
 ### Voice fails on mobile devices
 
-The browser microphone requires a secure origin or localhost. This means local native use or LAN-based access may behave differently depending on the browser. Tapping the mic on a browser page can require permission and may not work on all mobile browsers.
+Browser microphone access generally requires a secure context (HTTPS or localhost) and explicit permission. Browser behavior on a LAN address or mobile device can vary. If microphone capture is unavailable, try uploading a supported audio file.
+
+### PDF has no extracted text
+
+Scanned/image-only PDFs do not contain selectable text for `pypdf` to extract. Provide the relevant pages as images instead; OCR is not built into this PDF extraction path.
 
 ### ffmpeg warnings
 
-ffmpeg is optional but useful for unusual media formats. Install it as needed:
+ffmpeg is optional. Install it if you need conversion for unusual audio/video formats or resizing for large images:
 
 - Termux: `pkg install ffmpeg`
-- macOS: `brew install ffmpeg`
-- Linux: `sudo apt install ffmpeg`
+- macOS: `brew install ffmpeg` (Homebrew)
+- Debian/Ubuntu Linux: `sudo apt install ffmpeg`
 - Windows: `winget install ffmpeg`
 
-## Privacy and safety
+The installer may offer the optional `imageio-ffmpeg` Python package as an alternative on supported desktop environments.
 
-- Your chat history and skill memory live in a local SQLite file on your device
-- Your `.env` file contains your API key and should never be committed or shared
-- The app intentionally blocks unsafe local/private network addresses when reading URL-based content
-- Always use `APP_PASSWORD` when exposing the app on a LAN or hotspot
-- Treat AI output as assistive information, not legal, medical, or financial advice
-
-## Project layout
+## Development and project layout
 
 ```text
-app.py                  Flask app and HTTP routes
-core.py                 AI logic, memory orchestration, routing, platform detection
-agents.py               Agent definitions and system prompt logic
-db.py                   SQLite storage and cleanup logic
-media.py                Media preparation and PDF handling
-static/                 Frontend assets (HTML, CSS, JS)
-.env.example            Sample environment file
-requirements.txt        Runtime dependencies
-requirements-optional.txt  Optional tooling
-install.sh              Unix installer
-install.bat             Windows installer
-start.sh                Unix launcher
-start.bat               Windows launcher
-README.md               Project documentation
+app.py                    Flask application, API routes, and server startup
+core.py                   Model calls, routing, memory, and platform logic
+agents.py                 Built-in agent definitions and instructions
+db.py                     SQLite schema, history, and cleanup
+media.py                  PDF, image, audio, and video preparation
+static/                   Browser UI assets
+tests/                    Automated tests
+.env.example              Documented sample configuration
+requirements.txt          Runtime Python dependencies
+requirements-optional.txt  Optional media conversion dependency
+install.sh / install.bat  Setup scripts
+start.sh / start.bat      Launch scripts
+logo.svg                  App logo and PWA icon
 ```
 
-## Future hardening opportunities
+### Run tests
 
-This project is already usable as a local-first AI workspace. Production hardening opportunities include:
+Run the test suite from the repository root:
 
-- custom TLS termination behind a reverse proxy
-- stronger admin/user access controls for LAN deployments
-- packaging as a native wrapper for iOS and Android using Capacitor or similar tooling
-- background sync and local backups for multi-device setups
-- structured logging and audit trails
-
-## License
-
-This project is available under the terms of the included license file.
-
-
-## Change the logo
-
-Replace `logo.svg` in the project folder with your own SVG. It is used in the sidebar, the welcome screen, the browser tab and the home-screen icon, and it resizes automatically. For best results the SVG should have a `viewBox` attribute. Use `APP_NAME=` (empty) in `.env` if your logo already contains the name.
+```bash
+python -m pytest
+```
 
 ## Contributing
 
-Issues and pull requests are welcome. Keep it simple: one small change per pull request, and test it on a phone-sized screen.
-The `main` branch is protected: every change goes through a pull request that the maintainer reviews and approves. To add an agent, add an entry to `agents.py` and a `LEVEL_` line to `.env.example`.
+Issues and pull requests are welcome. Keep changes focused, test the behavior you change, and check the responsive interface at phone-sized widths. The `main` branch is protected: submit changes through a pull request for maintainer review rather than pushing directly to `main`.
+
+To add a built-in agent, define it in `agents.py` and document its `LEVEL_` setting in `.env.example`. Keep API keys and other secrets out of commits.
+
+## Logo customization
+
+Replace `logo.svg` with your own SVG to update the in-app and PWA logo. A `viewBox` helps it scale cleanly. If the logo includes the product name, set `APP_NAME=` in `.env` to hide the separate name label.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+This project is licensed under the [MIT License](LICENSE).
 
 ## Credits
 
